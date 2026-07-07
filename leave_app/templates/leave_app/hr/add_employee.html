@@ -1,0 +1,124 @@
+{% extends 'leave_app/base.html' %}
+{% block title %}Add Employee — Empleave{% endblock %}
+{% block page_title %}Add New Employee{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header-clean py-3">
+        <i class="bi bi-person-plus me-2"></i>Create Employee Account
+      </div>
+      <div class="p-4">
+        <form method="POST">
+          {% csrf_token %}
+
+          <!-- Section: Personal Info -->
+          <div class="mb-3" style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;font-weight:600;">
+            Personal Information
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">First Name</label>
+              <input type="text" name="first_name" class="form-control" placeholder="e.g. Naveen">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Last Name</label>
+              <input type="text" name="last_name" class="form-control" placeholder="e.g. Kumar">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email Address <span class="text-danger">*</span></label>
+              <input type="email" name="email" class="form-control" required placeholder="naveen@company.com">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Phone Number</label>
+              <input type="text" name="phone" class="form-control" placeholder="+91 9876543210">
+            </div>
+          </div>
+
+          <!-- Section: Account -->
+          <div class="mb-3" style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;font-weight:600;">
+            Account Credentials
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Username <span class="text-danger">*</span></label>
+              <input type="text" name="username" class="form-control" required placeholder="naveen.kumar">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Password <span class="text-danger">*</span></label>
+              <input type="password" name="password" class="form-control" required
+                     placeholder="Min. 6 characters" minlength="6">
+              <div style="font-size:11.5px;color:#6b7280;margin-top:4px;">
+                This will be emailed to the employee.
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Work Info -->
+          <div class="mb-3" style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;font-weight:600;">
+            Work Details
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Role <span class="text-danger">*</span></label>
+              <select name="role" class="form-select" required>
+                <option value="employee">Employee</option>
+                <option value="manager">Manager</option>
+                <option value="hr">HR</option>
+                <option value="boss">Boss</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Department</label>
+              <input type="text" name="department" class="form-control" placeholder="e.g. Engineering">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Employee ID</label>
+              <input type="text" name="employee_id" class="form-control" placeholder="e.g. EMP001">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Date of Joining</label>
+              <input type="date" name="date_joined" class="form-control"
+                     value="{% now 'Y-m-d' %}">
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">Reporting Manager</label>
+              <select name="manager" class="form-select">
+                <option value="">— None / Top level —</option>
+                {% for mgr in managers %}
+                <option value="{{ mgr.pk }}">
+                  {{ mgr.profile.display_name }}
+                  {% if mgr.profile.department %}({{ mgr.profile.department }}){% endif %}
+                  — {{ mgr.profile.get_role_display }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- Leave balances info -->
+          {% if leave_types %}
+          <div class="alert alert-info d-flex gap-2 align-items-start" style="font-size:13px;">
+            <i class="bi bi-info-circle mt-1"></i>
+            <div>
+              Leave balances will be auto-assigned for the current year:
+              {% for lt in leave_types %}
+              <strong>{{ lt.name }} ({{ lt.total_days }} days)</strong>{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-brand">
+              <i class="bi bi-person-check me-1"></i>Create Employee
+            </button>
+            <a href="{% url 'hr_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

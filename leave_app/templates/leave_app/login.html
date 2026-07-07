@@ -1,0 +1,172 @@
+{% extends 'leave_app/base.html' %}
+
+{% block title %}Sign In — Empleave{% endblock %}
+
+{% block auth_content %}
+<style>
+  body { background: #f0f0ff; }
+  .login-wrap {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .login-box {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(79,70,229,.12);
+    width: 100%; max-width: 440px;
+    overflow: hidden;
+  }
+  .login-header {
+    background: #1e1b4b;
+    padding: 32px 36px 24px;
+    text-align: center;
+  }
+  .login-header .brand {
+    font-size: 26px; font-weight: 700; color: #fff; letter-spacing: .4px;
+  }
+  .login-header .brand-sub {
+    font-size: 12px; color: rgba(255,255,255,.45);
+    text-transform: uppercase; letter-spacing: 1.2px; margin-top: 4px;
+  }
+  .role-tabs {
+    display: flex; border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+  .role-tab {
+    flex: 1; text-align: center; padding: 11px 4px;
+    font-size: 11px; font-weight: 600;
+    color: #6b7280; cursor: pointer;
+    text-transform: uppercase; letter-spacing: .8px;
+    border-bottom: 2px solid transparent;
+    transition: all .15s;
+    user-select: none;
+  }
+  .role-tab.active { color: #4f46e5; border-bottom-color: #4f46e5; background: #fff; }
+  .role-tab i { display: block; font-size: 18px; margin-bottom: 3px; }
+  .login-body { padding: 28px 36px 32px; }
+  .login-body .form-label { font-size: 13px; font-weight: 600; color: #374151; }
+  .login-body .form-control {
+    border-radius: 8px; border: 1px solid #d1d5db;
+    font-size: 14px; padding: 10px 14px;
+  }
+  .login-body .form-control:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+  }
+  .login-hint {
+    background: #f0f0ff; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 20px;
+    font-size: 12px; color: #4338ca;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-login {
+    width: 100%; padding: 12px; border: none; border-radius: 10px;
+    background: #4f46e5; color: #fff;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-login:hover { background: #3730a3; }
+  .role-hint-text { font-size: 11.5px; color: #6b7280; text-align: center; margin-top: 16px; }
+</style>
+
+<div class="login-wrap">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="brand"><i class="bi bi-calendar2-check me-2"></i>Empleave</div>
+      <div class="brand-sub">HR Leave Management System</div>
+    </div>
+
+    <!-- Role tabs -->
+    <div class="role-tabs" id="roleTabs">
+      <div class="role-tab active" data-role="employee" onclick="setRole(this)">
+        <i class="bi bi-person"></i>Employee
+      </div>
+      <div class="role-tab" data-role="manager" onclick="setRole(this)">
+        <i class="bi bi-person-badge"></i>Manager
+      </div>
+      <div class="role-tab" data-role="hr" onclick="setRole(this)">
+        <i class="bi bi-people"></i>HR
+      </div>
+      <div class="role-tab" data-role="boss" onclick="setRole(this)">
+        <i class="bi bi-star"></i>Boss
+      </div>
+    </div>
+
+    <div class="login-body">
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="alert alert-danger py-2 mb-3" style="font-size:13px;">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ msg }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="login-hint" id="loginHint">
+        <i class="bi bi-info-circle"></i>
+        <span id="hintText">Sign in with your employee credentials.</span>
+      </div>
+
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-control"
+                 placeholder="Enter your username" required autofocus
+                 value="{{ request.POST.username }}">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Password</label>
+          <div style="position:relative;">
+            <input type="password" name="password" id="passwordField"
+                   class="form-control" placeholder="Enter your password" required
+                   style="padding-right:44px;">
+            <button type="button" onclick="togglePwd()" tabindex="-1"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                           background:none;border:none;color:#9ca3af;cursor:pointer;">
+              <i class="bi bi-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login">
+          Sign In <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+      </form>
+
+      <div class="role-hint-text">
+        Can't access your account? Contact your HR team.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const hints = {
+  employee: 'Sign in with your employee credentials.',
+  manager:  'Sign in as a team manager to review leave requests.',
+  hr:       'HR portal — manage employees and leave approvals.',
+  boss:     'Executive view — full company leave overview.',
+};
+
+function setRole(el) {
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('hintText').textContent = hints[el.dataset.role];
+}
+
+function togglePwd() {
+  const f = document.getElementById('passwordField');
+  const i = document.getElementById('eyeIcon');
+  if (f.type === 'password') {
+    f.type = 'text';
+    i.className = 'bi bi-eye-slash';
+  } else {
+    f.type = 'password';
+    i.className = 'bi bi-eye';
+  }
+}
+</script>
+{% endblock %}

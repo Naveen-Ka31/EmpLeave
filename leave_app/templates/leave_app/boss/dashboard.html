@@ -1,0 +1,127 @@
+{% extends 'leave_app/base.html' %}
+{% block title %}Executive Dashboard — Empleave{% endblock %}
+{% block page_title %}Executive Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-2">
+    <div class="stat-card" style="background:#f3e8ff;color:#6b21a8;">
+      <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+      <div class="stat-value">{{ stats.employees }}</div>
+      <div class="stat-label">Employees</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card" style="background:#fef3c7;color:#92400e;">
+      <div class="stat-icon"><i class="bi bi-hourglass"></i></div>
+      <div class="stat-value">{{ stats.pending }}</div>
+      <div class="stat-label">Pending</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card" style="background:#dbeafe;color:#1e40af;">
+      <div class="stat-icon"><i class="bi bi-check2"></i></div>
+      <div class="stat-value">{{ stats.manager_approved }}</div>
+      <div class="stat-label">Needs Final</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card" style="background:#d1fae5;color:#065f46;">
+      <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+      <div class="stat-value">{{ stats.approved }}</div>
+      <div class="stat-label">Approved</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card" style="background:#fee2e2;color:#991b1b;">
+      <div class="stat-icon"><i class="bi bi-x-circle"></i></div>
+      <div class="stat-value">{{ stats.rejected }}</div>
+      <div class="stat-label">Rejected</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card" style="background:#f3f4f6;color:#374151;">
+      <div class="stat-icon"><i class="bi bi-stack"></i></div>
+      <div class="stat-value">{{ stats.total }}</div>
+      <div class="stat-label">Total</div>
+    </div>
+  </div>
+</div>
+
+<!-- All Requests -->
+<div class="card">
+  <div class="card-header-clean d-flex justify-content-between align-items-center py-3">
+    <span><i class="bi bi-building me-2"></i>Company-Wide Leave Requests</span>
+    <div class="d-flex gap-2">
+      <a href="{% url 'add_employee' %}" class="btn btn-brand btn-sm">
+        <i class="bi bi-person-plus me-1"></i>Add Employee
+      </a>
+      <form method="GET" class="d-flex gap-1">
+        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()"
+                style="font-size:12px;width:auto;">
+          <option value="">All Status</option>
+          <option value="pending"          {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="manager_approved" {% if status_filter == 'manager_approved' %}selected{% endif %}>Manager Approved</option>
+          <option value="approved"         {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+          <option value="rejected"         {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+        </select>
+      </form>
+    </div>
+  </div>
+  <div class="p-0">
+    {% if requests %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th class="ps-3">Employee</th>
+            <th>Manager</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Days</th>
+            <th>Status</th>
+            <th>Applied</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests %}
+          <tr>
+            <td class="ps-3">
+              <div class="fw-semibold" style="font-size:13px;">{{ req.employee.profile.display_name }}</div>
+              <div class="text-muted" style="font-size:11px;">{{ req.employee.profile.department|default:"—" }}</div>
+            </td>
+            <td style="font-size:12.5px;">
+              {{ req.employee.profile.manager.profile.display_name|default:"—" }}
+            </td>
+            <td>{{ req.leave_type.name|default:"—" }}</td>
+            <td>{{ req.start_date }}</td>
+            <td>{{ req.end_date }}</td>
+            <td>{{ req.duration_days }}</td>
+            <td><span class="badge-status status-{{ req.status }}">{{ req.get_status_display }}</span></td>
+            <td class="text-muted" style="font-size:12px;">{{ req.applied_on|date:"d M Y" }}</td>
+            <td>
+              {% if req.status in "pending,manager_approved" %}
+              <a href="{% url 'boss_review' req.pk %}" class="btn btn-brand btn-sm">
+                <i class="bi bi-check2-circle me-1"></i>Review
+              </a>
+              {% else %}
+              <span class="text-muted" style="font-size:12px;">Done</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-2 d-block mb-2"></i>No requests found.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

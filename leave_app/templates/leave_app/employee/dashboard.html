@@ -1,0 +1,123 @@
+{% extends 'leave_app/base.html' %}
+{% block title %}My Dashboard — Empleave{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ── Stat row ─────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="background:#ede9fe;color:#3730a3;">
+      <div class="stat-icon"><i class="bi bi-send"></i></div>
+      <div class="stat-value">{{ stats.total }}</div>
+      <div class="stat-label">Total Requests</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="background:#fef3c7;color:#92400e;">
+      <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+      <div class="stat-value">{{ stats.pending }}</div>
+      <div class="stat-label">Pending</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="background:#d1fae5;color:#065f46;">
+      <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+      <div class="stat-value">{{ stats.approved }}</div>
+      <div class="stat-label">Approved</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="background:#fee2e2;color:#991b1b;">
+      <div class="stat-icon"><i class="bi bi-x-circle"></i></div>
+      <div class="stat-value">{{ stats.rejected }}</div>
+      <div class="stat-label">Rejected</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Leave Balances ────────────────────────────────────── -->
+<div class="card mb-4">
+  <div class="card-header-clean d-flex justify-content-between align-items-center py-3">
+    <span><i class="bi bi-wallet2 me-2"></i>Leave Balance — {{ request.user.profile.display_name }}</span>
+    <a href="{% url 'apply_leave' %}" class="btn btn-brand btn-sm">
+      <i class="bi bi-plus-lg me-1"></i>Apply Leave
+    </a>
+  </div>
+  <div class="p-3">
+    {% if balances %}
+      <div class="row g-3">
+        {% for b in balances %}
+        <div class="col-sm-6 col-lg-4">
+          <div class="balance-card">
+            <div class="bal-label">{{ b.leave_type.name }}</div>
+            <div class="d-flex align-items-end gap-2 mt-1">
+              <div class="bal-value">{{ b.remaining_days }}</div>
+              <div class="bal-sub mb-2">/ {{ b.leave_type.total_days }} days</div>
+            </div>
+            <div class="progress mt-2" style="height:6px;">
+              <div class="progress-bar {% if b.usage_percent > 80 %}bg-danger{% elif b.usage_percent > 50 %}bg-warning{% else %}bg-success{% endif %}"
+                   style="width:{{ b.usage_percent }}%"></div>
+            </div>
+            <div class="bal-sub mt-1">{{ b.used_days }} used · {{ b.remaining_days }} remaining</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-4 text-muted">
+        <i class="bi bi-exclamation-circle fs-3 d-block mb-2"></i>
+        No leave balance assigned yet. Please contact HR.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ── Recent Leave Requests ─────────────────────────────── -->
+<div class="card">
+  <div class="card-header-clean d-flex justify-content-between align-items-center py-3">
+    <span><i class="bi bi-clock-history me-2"></i>Recent Leave Requests</span>
+    <a href="{% url 'my_leaves' %}" class="btn btn-outline-secondary btn-sm">View All</a>
+  </div>
+  <div class="p-0">
+    {% if requests %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th class="ps-3">Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Days</th>
+            <th>Status</th>
+            <th>Applied On</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests %}
+          <tr>
+            <td class="ps-3 fw-semibold">{{ req.leave_type.name|default:"—" }}</td>
+            <td>{{ req.start_date }}</td>
+            <td>{{ req.end_date }}</td>
+            <td>{{ req.duration_days }}</td>
+            <td>
+              <span class="badge-status status-{{ req.status }}">
+                {{ req.get_status_display }}
+              </span>
+            </td>
+            <td style="color:#9ca3af;">{{ req.applied_on|date:"d M Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+      No leave requests yet. <a href="{% url 'apply_leave' %}">Apply for leave</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

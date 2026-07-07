@@ -1,0 +1,60 @@
+{% extends 'leave_app/base.html' %}
+{% block title %}My Leaves — Empleave{% endblock %}
+{% block page_title %}My Leave History{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header-clean d-flex justify-content-between align-items-center py-3">
+    <span><i class="bi bi-clock-history me-2"></i>All Leave Requests</span>
+    <a href="{% url 'apply_leave' %}" class="btn btn-brand btn-sm">
+      <i class="bi bi-plus-lg me-1"></i>Apply Leave
+    </a>
+  </div>
+  <div class="p-0">
+    {% if requests %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th class="ps-3">#</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Days</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Manager Note</th>
+            <th>Final Note</th>
+            <th>Applied</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests %}
+          <tr>
+            <td class="ps-3 text-muted" style="font-size:12px;">{{ forloop.counter }}</td>
+            <td class="fw-semibold">{{ req.leave_type.name|default:"—" }}</td>
+            <td>{{ req.start_date }}</td>
+            <td>{{ req.end_date }}</td>
+            <td>{{ req.duration_days }}</td>
+            <td style="max-width:160px;" class="text-truncate text-muted">{{ req.reason }}</td>
+            <td>
+              <span class="badge-status status-{{ req.status }}">{{ req.get_status_display }}</span>
+            </td>
+            <td style="font-size:12px;color:#6b7280;">{{ req.manager_comment|default:"—" }}</td>
+            <td style="font-size:12px;color:#6b7280;">{{ req.final_comment|default:"—" }}</td>
+            <td style="color:#9ca3af;font-size:12px;">{{ req.applied_on|date:"d M Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+      You haven't applied for any leave yet.
+      <br><a href="{% url 'apply_leave' %}" class="mt-2 d-inline-block">Apply now</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

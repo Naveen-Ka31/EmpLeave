@@ -1,0 +1,114 @@
+{% extends 'leave_app/base.html' %}
+{% block title %}Review Leave — Empleave{% endblock %}
+{% block page_title %}Review Leave Request{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card mb-3">
+      <div class="card-header-clean py-3">
+        <i class="bi bi-file-earmark-text me-2"></i>Leave Request Details
+      </div>
+      <div class="p-4">
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;">Employee</div>
+            <div style="font-size:15px;font-weight:600;color:#111827;margin-top:3px;">
+              {{ leave_req.employee.profile.display_name }}
+            </div>
+            <div style="font-size:12px;color:#6b7280;">{{ leave_req.employee.profile.department|default:"—" }}</div>
+          </div>
+          <div class="col-6">
+            <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;">Leave Type</div>
+            <div style="font-size:15px;font-weight:600;color:#111827;margin-top:3px;">
+              {{ leave_req.leave_type.name|default:"—" }}
+            </div>
+          </div>
+          <div class="col-6">
+            <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;">From</div>
+            <div style="font-size:15px;font-weight:600;color:#111827;margin-top:3px;">{{ leave_req.start_date }}</div>
+          </div>
+          <div class="col-6">
+            <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;">To</div>
+            <div style="font-size:15px;font-weight:600;color:#111827;margin-top:3px;">{{ leave_req.end_date }}</div>
+          </div>
+          <div class="col-6">
+            <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;">Duration</div>
+            <div style="font-size:15px;font-weight:600;color:#111827;margin-top:3px;">
+              {{ leave_req.duration_days }} day(s)
+            </div>
+          </div>
+          <div class="col-6">
+            <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;">Applied On</div>
+            <div style="font-size:15px;font-weight:600;color:#111827;margin-top:3px;">
+              {{ leave_req.applied_on|date:"d M Y" }}
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;">Reason</div>
+          <div style="background:#f9fafb;border-radius:8px;padding:14px;margin-top:6px;
+                      font-size:14px;color:#374151;line-height:1.6;">
+            {{ leave_req.reason }}
+          </div>
+        </div>
+
+        <!-- Action form -->
+        <form method="POST">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Your Comment (optional)</label>
+            <textarea name="comment" class="form-control" rows="3"
+                      placeholder="Add a note for the employee..."></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" name="action" value="approve"
+                    class="btn btn-brand flex-fill">
+              <i class="bi bi-check-circle me-1"></i>Approve
+            </button>
+            <button type="submit" name="action" value="reject"
+                    class="btn btn-danger flex-fill"
+                    onclick="return confirm('Are you sure you want to reject this request?')">
+              <i class="bi bi-x-circle me-1"></i>Reject
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <a href="{% url 'manager_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+    </a>
+  </div>
+
+  <div class="col-lg-5 mt-3 mt-lg-0">
+    <div class="card">
+      <div class="card-header-clean py-3">
+        <i class="bi bi-info-circle me-2"></i>Employee Leave Balance
+      </div>
+      <div class="p-3">
+        {% with year=leave_req.start_date.year %}
+        {% for b in leave_req.employee.leave_balances.all %}
+          {% if b.year == year %}
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+            <span style="font-size:13px;font-weight:{% if b.leave_type == leave_req.leave_type %}600{% else %}400{% endif %};">
+              {% if b.leave_type == leave_req.leave_type %}
+                <i class="bi bi-arrow-right text-primary me-1"></i>
+              {% endif %}
+              {{ b.leave_type.name }}
+            </span>
+            <span style="font-size:15px;font-weight:700;
+              color:{% if b.remaining_days < 3 %}#dc2626{% else %}#1e1b4b{% endif %};">
+              {{ b.remaining_days }} <small class="text-muted fw-normal">left</small>
+            </span>
+          </div>
+          {% endif %}
+        {% empty %}
+          <p class="text-muted text-center py-3" style="font-size:13px;">No balance records found.</p>
+        {% endfor %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

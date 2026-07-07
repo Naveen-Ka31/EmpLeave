@@ -1,0 +1,123 @@
+{% extends 'leave_app/base.html' %}
+{% block title %}Manager Dashboard — Empleave{% endblock %}
+{% block page_title %}Manager Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="background:#ede9fe;color:#3730a3;">
+      <div class="stat-icon"><i class="bi bi-people"></i></div>
+      <div class="stat-value">{{ team_members.count }}</div>
+      <div class="stat-label">Team Members</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="background:#fef3c7;color:#92400e;">
+      <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+      <div class="stat-value">{{ stats.pending }}</div>
+      <div class="stat-label">Pending Review</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="background:#d1fae5;color:#065f46;">
+      <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+      <div class="stat-value">{{ stats.approved }}</div>
+      <div class="stat-label">Approved</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="background:#fee2e2;color:#991b1b;">
+      <div class="stat-icon"><i class="bi bi-x-circle"></i></div>
+      <div class="stat-value">{{ stats.rejected }}</div>
+      <div class="stat-label">Rejected</div>
+    </div>
+  </div>
+</div>
+
+<!-- Team Members quick view -->
+<div class="card mb-4">
+  <div class="card-header-clean py-3">
+    <i class="bi bi-people me-2"></i>Your Team ({{ team_members.count }} members)
+  </div>
+  <div class="p-3">
+    <div class="d-flex flex-wrap gap-2">
+      {% for member in team_members %}
+      <div style="background:#f3f4f6;border-radius:8px;padding:8px 14px;font-size:12.5px;">
+        <i class="bi bi-person-circle me-1 text-muted"></i>
+        <span class="fw-semibold">{{ member.profile.display_name }}</span>
+        <span class="text-muted ms-1">· {{ member.profile.department|default:"—" }}</span>
+      </div>
+      {% empty %}
+      <span class="text-muted" style="font-size:13px;">No team members assigned yet.</span>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Leave Requests -->
+<div class="card">
+  <div class="card-header-clean py-3">
+    <i class="bi bi-inbox me-2"></i>Team Leave Requests
+  </div>
+  <div class="p-0">
+    {% if requests %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th class="ps-3">Employee</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Days</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests %}
+          <tr>
+            <td class="ps-3">
+              <div class="fw-semibold" style="font-size:13px;">
+                {{ req.employee.profile.display_name }}
+              </div>
+              <div class="text-muted" style="font-size:11px;">
+                {{ req.employee.profile.department|default:"—" }}
+              </div>
+            </td>
+            <td>{{ req.leave_type.name|default:"—" }}</td>
+            <td>{{ req.start_date }}</td>
+            <td>{{ req.end_date }}</td>
+            <td>{{ req.duration_days }}</td>
+            <td style="max-width:160px;" class="text-truncate text-muted">{{ req.reason }}</td>
+            <td>
+              <span class="badge-status status-{{ req.status }}">{{ req.get_status_display }}</span>
+            </td>
+            <td>
+              {% if req.status == 'pending' %}
+              <a href="{% url 'manager_review' req.pk %}"
+                 class="btn btn-sm btn-brand">
+                <i class="bi bi-eye me-1"></i>Review
+              </a>
+              {% else %}
+              <span class="text-muted" style="font-size:12px;">Reviewed</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+      No leave requests from your team yet.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
