@@ -61,7 +61,7 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME', 'empleave_db'),
         'USER': os.environ.get('DB_USER', 'root'),
         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': 'localhost',
+        'HOST': os.environ.get('DB_HOST', 'localhost'),  # ← reads from .env
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',
